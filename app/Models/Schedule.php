@@ -12,6 +12,11 @@ class Schedule extends Model
         'datetime',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     /**
      * Relación con el modelo Reservation (un horario puede tener muchas reservas).
      */

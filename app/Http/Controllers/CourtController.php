@@ -15,19 +15,8 @@ class CourtController extends Controller
      */
     public function index()
     {
-        try {
-            $courts = Court::all();
-            if (!$courts) {
-                return response()->json([
-                    'message' => "No hay Canchas Actualmente"
-                ], 200);
-            }
-            return response()->json([
-                'data' => $courts
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-        }
+        $courts = Court::all();
+        return JsonResponse(data: $courts);
     }
 
     /**
@@ -44,20 +33,11 @@ class CourtController extends Controller
             "is_active" => "required"
         ]);
         if ($validator->fails()) {
-            return response()->json([
-                'message' => "error en la validacion de datos",
-                'error' => $validator->errors(),
-            ], 400);
+            return JsonResponse(errors: $validator->errors(), status: 400);
         }
-        try {
-            Court::create($request->all());
+        $court = Court::create($request->all());
 
-            return response()->json([
-                "message" => "Cancha creada"
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-        }
+        return JsonResponse(message: "Cancha creada con exito", data: $court, status: 201);
     }
 
     /**
@@ -65,14 +45,8 @@ class CourtController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $courts = Court::findOrFail($id);
-            return response()->json([
-                'data' => $courts
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-        }
+        $courts = Court::findOrFail($id);
+        return JsonResponse(data: $courts, status: 200);
     }
 
     /**
@@ -80,7 +54,7 @@ class CourtController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             "name" => "sometimes|required|max:50|string",
             "surface_type" => "sometimes|required|string",
             "number_players" => "sometimes|required|integer",
@@ -88,17 +62,10 @@ class CourtController extends Controller
             "description" => "sometimes|required|max:255",
             "is_active" => "sometimes|required"
         ]);
-        try {
-            $court = Court::findOrFail($id);
-            $court->update($validatedData);
+        $court = Court::findOrFail($id);
+        $court->update($request->all());
 
-            return response()->json([
-                'message' => 'Cancha Actualizada',
-                'data' => $court
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-        }
+        return JsonResponse(message: 'Actualizado con exito', data: $court, status: 200);
     }
 
     /**
@@ -106,17 +73,11 @@ class CourtController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            $court = Court::findOrFail($id);
 
-            $court->delete();
+        $court = Court::findOrFail($id);
 
-            return response()->json([
-                'message' => 'Cancha eliminada',
-                'data' => $court->name
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage());
-        }
+        $court->delete();
+
+        return JsonResponse(message: 'Eliminado con exito', data: $court, status: 200);
     }
 }

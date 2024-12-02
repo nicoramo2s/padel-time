@@ -13,12 +13,8 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        try {
-            $schedule = Schedule::all();
-            return response()->json($schedule, 200);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+        $schedule = Schedule::all();
+        return JsonResponse($schedule, 200);
     }
 
     /**
@@ -31,14 +27,11 @@ class ScheduleController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return JsonResponse(errors: $validator->errors(), status: 400);
         }
-        try {
-            $schedule = Schedule::create($request->all());
-            return response()->json("El Horario Creado es $schedule->datetime", 201);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+
+        $schedule = Schedule::create($request->all());
+        return JsonResponse(data: $schedule->datetime, message: "El Horario Creado exitosamente", status: 201);
     }
 
     /**
@@ -46,12 +39,8 @@ class ScheduleController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $schedule = Schedule::findOrFail($id);
-            return response()->json($schedule);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+        $schedule = Schedule::findOrFail($id);
+        return JsonResponse(data: $schedule, message: 'actualizado con exito', status: 200);
     }
 
     /**
@@ -67,22 +56,13 @@ class ScheduleController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
-        try {
-            // Buscar la reserva por ID
-            $schedule = Schedule::findOrFail($id);
+        // Buscar la reserva por ID
+        $schedule = Schedule::findOrFail($id);
 
-            // Actualizar los campos
-            $schedule->update($request->all());
+        // Actualizar los campos
+        $schedule->update($request->all());
 
-            return response()->json([
-                'message' => 'Horario actualizado con exito',
-                'data' => $schedule
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'error' => $th->getMessage()
-            ], 500);
-        }
+        return JsonResponse(data: $schedule, message: 'Horario actualizado con exito', status: 200);
     }
 
     /**
@@ -90,20 +70,13 @@ class ScheduleController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            // Buscar la reserva por ID
-            $schedule = Schedule::findOrFail($id);
 
-            // Eliminar el horario
-            $schedule->delete();
+        // Buscar la reserva por ID
+        $schedule = Schedule::findOrFail($id);
 
-            return response()->json([
-                'message' => 'Horario eliminado con exito'
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'error' => $th->getMessage()
-            ], 500);
-        }
+        // Eliminar el horario
+        $schedule->delete();
+
+        return JsonResponse(status: 200, message: 'Horario eliminado con exito');
     }
 }

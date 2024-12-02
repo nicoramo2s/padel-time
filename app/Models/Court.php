@@ -18,6 +18,11 @@ class Court extends Model
         'is_active',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     /**
      * Relación con el modelo Reservation (una cancha tiene muchas reservas).
      */

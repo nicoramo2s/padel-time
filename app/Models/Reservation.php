@@ -13,6 +13,7 @@ class Reservation extends Model
         'court_id',
         'schedule_id',
         'status',
+        'user_id'
     ];
 
     /**

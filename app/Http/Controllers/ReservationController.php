@@ -9,16 +9,20 @@ use Throwable;
 
 class ReservationController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(['auth:api', 'role:user'])->only('store');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        try {
-            return Reservation::all();
-        } catch (Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+        $reservations = Reservation::all();
+
+        return JsonResponse(data: $reservations);
     }
 
     /**
@@ -33,18 +37,17 @@ class ReservationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return JsonResponse(errors: $validator->errors(), status: 400);
         }
-        try {
-            $reservation = Reservation::create($request->all());
 
-            return response()->json([
-                "message" => "Reservacion realizada con Exito",
-                "data" => $reservation
-            ], 200);
-        } catch (Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+        $reservation = Reservation::create([
+            'court_id' => $request->court_id,
+            'schedule_id' => $request->schedule_id,
+            'status' => $request->status,
+            'user_id' => auth()->user()->id, // Asignar el usuario autenticado
+        ]);
+
+        return JsonResponse(message: "Reservacion realizada con Exito", data: $reservation, status: 201);
     }
 
     /**
@@ -52,15 +55,9 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $reservation = Reservation::findOrFail($id);
-            $reservation->load(['court', 'schedule']);
-            return response()->json([
-                "data" => $reservation
-            ], 200);
-        } catch (Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-        }
+        $reservation = Reservation::findOrFail($id);
+        $reservation->load(['court', 'schedule']);
+        return JsonResponse(data: $reservation, status: 200);
     }
 
     /**
@@ -76,25 +73,16 @@ class ReservationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return JsonResponse(errors: $validator->errors(), status: 400);
         }
 
-        try {
-            // Buscar la reserva por ID
-            $reservation = Reservation::findOrFail($id);
+        // Buscar la reserva por ID
+        $reservation = Reservation::findOrFail($id);
 
-            // Actualizar los campos de la reserva
-            $reservation->update($request->all());
+        // Actualizar los campos de la reserva
+        $reservation->update($request->all());
 
-            return response()->json([
-                'message' => 'Reservacion actualizada con exito',
-                'data' => $reservation
-            ], 200);
-        } catch (Throwable $th) {
-            return response()->json([
-                'error' => $th->getMessage()
-            ], 500);
-        }
+        return JsonResponse(message: 'Actualizado con exito', data: $reservation, status: 200);
     }
 
     /**
@@ -102,20 +90,12 @@ class ReservationController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            // Buscar la reserva por ID
-            $reservation = Reservation::findOrFail($id);
+        // Buscar la reserva por ID
+        $reservation = Reservation::findOrFail($id);
 
-            // Eliminar la reserva
-            $reservation->delete();
+        // Eliminar la reserva
+        $reservation->delete();
 
-            return response()->json([
-                'message' => 'Reservacion eliminada con exito'
-            ], 200);
-        } catch (Throwable $th) {
-            return response()->json([
-                'error' => $th->getMessage()
-            ], 500);
-        }
+        return JsonResponse(message: 'Eliminado con exito', data: $reservation, status: 200);
     }
 }
