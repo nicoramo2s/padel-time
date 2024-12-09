@@ -23,6 +23,10 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/register', [UserController::class, 'store']);
 
+Route::get("/", function() {
+    return JsonResponse('test de ruta');
+});
+
 Route::apiResource('/canchas', CourtController::class);
 Route::apiResource('/reservaciones', ReservationController::class);
 Route::apiResource('/horarios', ScheduleController::class);
